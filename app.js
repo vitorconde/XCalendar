@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Dias do mês atual
         for (let i = 1; i <= lastDay.getDate(); i++) {
             const dayElement = createDayElement(i, false);
+            const tempDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
             
             // Marcar dia atual
             const today = new Date();
@@ -137,11 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 dayElement.classList.add('today');
             }
             
-            // Verificar se há anotações neste dia
-            const tempDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
-            if (hasNotesForDate(tempDate)) {
-                dayElement.classList.add('has-notes');
-            }
+            // Atualizar indicadores de eventos
+            updateEventIndicators(dayElement, tempDate);
             
             // Marcar dia selecionado
             const isSelected = i === selectedDate.getDate() && 
@@ -178,18 +176,88 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Criar elemento de dia
+    // Função auxiliar para criar elementos de dia
     function createDayElement(day, isOtherMonth) {
         const dayElement = document.createElement('div');
-        dayElement.classList.add('day');
-        if (isOtherMonth) dayElement.classList.add('other-month');
+        dayElement.className = `day ${isOtherMonth ? 'other-month' : ''}`;
         
-        dayElement.textContent = day;
+        // Criar elemento para o número do dia
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = day;
+        dayElement.appendChild(dayNumber);
         
-        // Adicionar event listener para selecionar o dia
-        dayElement.addEventListener('click', () => selectDay(day));
+        // Criar container para os pontos de evento
+        const eventDots = document.createElement('div');
+        eventDots.className = 'event-dots';
+        dayElement.appendChild(eventDots);
+        
+        // Adicionar evento de clique
+        dayElement.addEventListener('click', () => {
+            selectDay(day, isOtherMonth);
+        });
         
         return dayElement;
+    }
+
+    // Função para atualizar os indicadores de eventos em um dia
+    function updateEventIndicators(dayElement, date) {
+        const dateKey = formatDateKey(date);
+        const dayNotes = notes[dateKey] || {};
+        const eventDots = dayElement.querySelector('.event-dots');
+        eventDots.innerHTML = ''; // Limpar indicadores existentes
+        
+        // Criar um mapa para armazenar contagens por categoria e fonte
+        const eventMap = {};
+        
+        // Contar eventos por categoria e fonte
+        Object.entries(dayNotes).forEach(([category, categoryNotes]) => {
+            if (categoryNotes && categoryNotes.length > 0) {
+                if (!eventMap[category]) {
+                    eventMap[category] = { count: 0, sources: {} };
+                }
+                eventMap[category].count += categoryNotes.length;
+                
+                // Contar por fonte
+                categoryNotes.forEach(note => {
+                    const source = note.source || 'geral';
+                    eventMap[category].sources[source] = (eventMap[category].sources[source] || 0) + 1;
+                });
+            }
+        });
+        
+        // Limitar a 4 indicadores (um para cada categoria)
+        const maxDots = 4;
+        let dotCount = 0;
+        
+        // Ordenar categorias por quantidade de eventos (mais eventos primeiro)
+        const sortedCategories = Object.entries(eventMap)
+            .sort((a, b) => b[1].count - a[1].count);
+        
+        // Adicionar indicadores para cada categoria
+        for (const [category, data] of sortedCategories) {
+            if (dotCount >= maxDots) break;
+            
+            const dot = document.createElement('div');
+            dot.className = `event-dot ${category}`;
+            
+            // Criar tooltip com detalhes
+            const sourceTexts = [];
+            for (const [source, count] of Object.entries(data.sources)) {
+                sourceTexts.push(`${count} ${source}${count > 1 ? 's' : ''}`);
+            }
+            
+            dot.title = `${category.charAt(0).toUpperCase() + category.slice(1)}: ${data.count} evento(s) (${sourceTexts.join(', ')})`;
+            eventDots.appendChild(dot);
+            dotCount++;
+        }
+        
+        // Adicionar/remover classe has-notes
+        if (Object.keys(dayNotes).length > 0) {
+            dayElement.classList.add('has-notes');
+        } else {
+            dayElement.classList.remove('has-notes');
+        }
     }
 
     // Selecionar dia
