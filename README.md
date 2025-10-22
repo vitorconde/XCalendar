@@ -103,8 +103,6 @@ Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 
 ## Contato
 
-Seu Nome - [@seu_twitter](https://twitter.com/seu_twitter) - email@exemplo.com
-
 Link do Projeto: [https://github.com/seu-usuario/XCalendar](https://github.com/seu-usuario/XCalendar)
 
 ## Agradecimentos
