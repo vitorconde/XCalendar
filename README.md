@@ -101,10 +101,6 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir issues e enviar 
 
 Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 
-## Contato
-
-Link do Projeto: [https://github.com/seu-usuario/XCalendar](https://github.com/seu-usuario/XCalendar)
-
 ## Agradecimentos
 
 - [Google Calendar API](https://developers.google.com/calendar)
