@@ -22,6 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentCategory = 'geral';
     let notes = JSON.parse(localStorage.getItem('xcalendar-notes') || '{}');
     let theme = localStorage.getItem('xcalendar-theme') || 'light';
+    
+    // Categorias de anotações
+    const categories = {
+        'geral': { name: 'Geral', color: '#4a6fa5' },
+        'saude': { name: 'Saúde', color: '#e74c3c' },
+        'exercicios': { name: 'Exercícios', color: '#2ecc71' },
+        'alimentacao': { name: 'Alimentação', color: '#f39c12' }
+    };
 
     // Inicialização
     function init() {
@@ -36,6 +44,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Carregar notas do dia atual
         loadDailyNotes();
+        
+        // Habilitar/desabilitar botão de salvar com base no conteúdo
+        dailyNote.addEventListener('input', () => {
+            document.getElementById('saveNote').disabled = !dailyNote.value.trim();
+        });
     }
 
     // Configurar event listeners
@@ -185,12 +198,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Carregar notas do dia selecionado
     function loadDailyNotes() {
         const dateKey = formatDateKey(selectedDate);
-        const dayNotes = notes[dateKey] || {};
+        const dayNotes = notes[dateKey] || { [currentCategory]: [] };
         
-        // Carregar nota da categoria atual
-        dailyNote.value = dayNotes[currentCategory] || '';
+        // Limpar campo de entrada
+        dailyNote.value = '';
         
-        // Atualiar categorias ativas
+        // Atualizar categorias ativas
         noteCategories.forEach(cat => {
             if (cat.dataset.category === currentCategory) {
                 cat.classList.add('active');
@@ -198,20 +211,169 @@ document.addEventListener('DOMContentLoaded', () => {
                 cat.classList.remove('active');
             }
         });
+        
+        // Exibir notas existentes
+        renderNotes(dayNotes[currentCategory] || []);
+    }
+    
+    // Renderizar notas na interface
+    function renderNotes(notesList) {
+        const notesFeed = document.getElementById('notesFeed');
+        notesFeed.innerHTML = '';
+        
+        if (!notesList || notesList.length === 0) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.textContent = 'Nenhuma anotação para este dia. Adicione uma acima!';
+            emptyState.style.textAlign = 'center';
+            emptyState.style.padding = '20px';
+            emptyState.style.color = 'var(--secondary-color)';
+            notesFeed.appendChild(emptyState);
+            return;
+        }
+        
+        // Ordenar notas por data (mais recentes primeiro)
+        const sortedNotes = [...notesList].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        sortedNotes.forEach((note, index) => {
+            const noteElement = createNoteElement(note, index);
+            notesFeed.appendChild(noteElement);
+        });
+    }
+    
+    // Criar elemento de nota
+    function createNoteElement(note, index) {
+        const noteElement = document.createElement('div');
+        noteElement.className = 'note-post';
+        
+        const category = categories[note.category] || categories.geral;
+        const date = new Date(note.timestamp);
+        const timeString = date.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        noteElement.innerHTML = `
+            <div class="note-post-header">
+                <span>${timeString}</span>
+                <span class="note-category-badge" style="background-color: ${category.color}20; color: ${category.color}">
+                    ${category.name}
+                </span>
+                <span class="note-time">${formatRelativeTime(date)}</span>
+            </div>
+            <div class="note-content">${escapeHtml(note.text)}</div>
+            <div class="note-actions">
+                <button class="note-action delete" data-index="${index}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Excluir
+                </button>
+            </div>
+        `;
+        
+        // Adicionar evento de clique para o botão de excluir
+        const deleteBtn = noteElement.querySelector('.delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteNote(index);
+            });
+        }
+        
+        return noteElement;
+    }
+    
+    // Formatador de tempo relativo (ex: "há 2 minutos")
+    function formatRelativeTime(date) {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return 'agora';
+        
+        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        if (diffInMinutes < 60) return `há ${diffInMinutes} min`;
+        
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `há ${diffInHours} h`;
+        
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays === 1) return 'ontem';
+        if (diffInDays < 7) return `há ${diffInDays} dias`;
+        
+        return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit'
+        });
+    }
+    
+    // Função auxiliar para escapar HTML
+    function escapeHtml(unsafe) {
+        if (!unsafe) return '';
+        return unsafe
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+            .replace(/\n/g, '<br>');
     }
 
-    // Salvar nota
+    // Salvar nova nota
     function saveNote() {
-        if (!dailyNote.value.trim()) return;
+        const noteText = dailyNote.value.trim();
+        if (!noteText) return;
         
         const dateKey = formatDateKey(selectedDate);
+        const timestamp = new Date().toISOString();
         
+        // Criar estrutura de dados da nota
+        const newNote = {
+            text: noteText,
+            category: currentCategory,
+            timestamp: timestamp
+        };
+        
+        // Inicializar estruturas de dados se não existirem
         if (!notes[dateKey]) {
             notes[dateKey] = {};
         }
+        if (!Array.isArray(notes[dateKey][currentCategory])) {
+            notes[dateKey][currentCategory] = [];
+        }
         
-        notes[dateKey][currentCategory] = dailyNote.value.trim();
+        // Adicionar a nova nota
+        notes[dateKey][currentCategory].push(newNote);
+        
+        // Salvar no localStorage
         localStorage.setItem('xcalendar-notes', JSON.stringify(notes));
+        
+        // Atualizar a interface
+        renderNotes(notes[dateKey][currentCategory]);
+        
+        // Limpar o campo de entrada
+        dailyNote.value = '';
+        
+        // Rolar para a nova nota
+        const notesFeed = document.getElementById('notesFeed');
+        notesFeed.scrollTop = 0;
+    }
+    
+    // Excluir nota
+    function deleteNote(noteIndex) {
+        const dateKey = formatDateKey(selectedDate);
+        if (!notes[dateKey] || !notes[dateKey][currentCategory]) return;
+        
+        // Remover a nota do array
+        notes[dateKey][currentCategory].splice(noteIndex, 1);
+        
+        // Atualizar o localStorage
+        localStorage.setItem('xcalendar-notes', JSON.stringify(notes));
+        
+        // Atualizar a interface
+        renderNotes(notes[dateKey][currentCategory]);
     }
 
     // Limpar nota
@@ -222,9 +384,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Trocar categoria de notas
     function switchCategory(category) {
-        // Salvar nota atual antes de trocar de categoria
-        saveNote();
-        
         // Atualizar categoria atual
         currentCategory = category;
         
