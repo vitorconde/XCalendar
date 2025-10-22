@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "XCalendar - Seu Calendário Pessoal",
+  "version": "1.0.0",
+  "description": "Um calendário pessoal que sincroniza com Google, Apple e Outlook, além de permitir anotações diárias",
+  "permissions": [
+    "storage",
+    "identity",
+    "identity.email"
+  ],
+  "host_permissions": [
+    "https://accounts.google.com/*",
+    "https://*.microsoftonline.com/*",
+    "https://*.apple.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

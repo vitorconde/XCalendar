@@ -1,0 +1,22 @@
+{
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "files.associations": {
+        "*.js": "javascript",
+        "*.css": "css",
+        "*.html": "html"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/node_modules": true
+    },
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#4a6fa5",
+        "titleBar.activeForeground": "#ffffff"
+    },
+    "liveServer.settings.port": 5500,
+    "liveServer.settings.root": "/",
+    "liveServer.settings.CustomBrowser": "chrome"
+}

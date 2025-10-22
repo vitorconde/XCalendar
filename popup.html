@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XCalendar</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>XCalendar</h1>
+            <div class="theme-toggle" id="themeToggle">🌓</div>
+        </header>
+        
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button id="prevMonth">◀</button>
+                <h2 id="currentMonth">Outubro 2025</h2>
+                <button id="nextMonth">▶</button>
+            </div>
+            
+            <div class="weekdays">
+                <div>Dom</div>
+                <div>Seg</div>
+                <div>Ter</div>
+                <div>Qua</div>
+                <div>Qui</div>
+                <div>Sex</div>
+                <div>Sáb</div>
+            </div>
+            
+            <div class="days" id="calendarDays">
+                <!-- Os dias serão preenchidos via JavaScript -->
+            </div>
+        </div>
+        
+        <div class="notes-container">
+            <h3>Notas do Dia</h3>
+            <div class="note-categories">
+                <button class="note-category active" data-category="geral">Geral</button>
+                <button class="note-category" data-category="saude">Saúde</button>
+                <button class="note-category" data-category="exercicios">Exercícios</button>
+                <button class="note-category" data-category="alimentacao">Alimentação</button>
+            </div>
+            <div class="note-input-container">
+                <textarea id="dailyNote" placeholder="O que está acontecendo hoje?"></textarea>
+                <div class="note-actions">
+                    <button id="saveNote">Postar</button>
+                    <button id="clearNote" class="secondary">Limpar</button>
+                </div>
+            </div>
+            <div class="notes-feed" id="notesFeed">
+                <!-- As anotações serão exibidas aqui -->
+            </div>
+        </div>
+        
+        <div class="calendar-sync">
+            <h3>Sincronizar Calendários</h3>
+            <button id="syncGoogle" class="sync-button">
+                <img src="icons/google.png" alt="Google">
+                Conectar Google Calendar
+            </button>
+            <button id="syncOutlook" class="sync-button">
+                <img src="icons/outlook.png" alt="Outlook">
+                Conectar Outlook
+            </button>
+            <button id="syncApple" class="sync-button">
+                <img src="icons/apple.png" alt="Apple">
+                Conectar Apple Calendar
+            </button>
+        </div>
+    </div>
+    
+    <script src="app.js" type="module"></script>
+</body>
+</html>

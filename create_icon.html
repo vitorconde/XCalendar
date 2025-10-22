@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerador de Ícones para XCalendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4a6fa5;
+            text-align: center;
+        }
+        .instructions {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f7ff;
+            border-left: 4px solid #4a6fa5;
+            border-radius: 4px;
+        }
+        .icon-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .icon-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+        }
+        .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #4a6fa5;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            margin-bottom: 5px;
+        }
+        .size-16 { width: 16px; height: 16px; font-size: 8px; }
+        .size-32 { width: 32px; height: 32px; font-size: 16px; }
+        .size-48 { width: 48px; height: 48px; font-size: 24px; }
+        .size-128 { width: 128px; height: 128px; font-size: 48px; }
+        .size-256 { width: 256px; height: 256px; font-size: 96px; }
+        .download-btn {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        .download-btn:hover {
+            background: #3a5a8f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerador de Ícones para XCalendar</h1>
+        
+        <div class="instructions">
+            <p><strong>Instruções:</strong> Clique com o botão direito em cada ícone abaixo e selecione "Salvar imagem como..." para baixá-lo. Salve os arquivos na pasta <code>icons/</code> do seu projeto com os seguintes nomes:</p>
+            <ul>
+                <li>16x16: <code>icon16.png</code></li>
+                <li>32x32: <code>icon32.png</code> (opcional)</li>
+                <li>48x48: <code>icon48.png</code></li>
+                <li>128x128: <code>icon128.png</code></li>
+                <li>256x256: <code>icon256.png</code> (opcional)</li>
+            </ul>
+        </div>
+
+        <div class="icon-preview">
+            <div class="icon-container">
+                <div class="icon size-16">XC</div>
+                <span>16x16</span>
+            </div>
+            <div class="icon-container">
+                <div class="icon size-32">XC</div>
+                <span>32x32</span>
+            </div>
+            <div class="icon-container">
+                <div class="icon size-48">XC</div>
+                <span>48x48</span>
+            </div>
+            <div class="icon-container">
+                <div class="icon size-128">XC</div>
+                <span>128x128</span>
+            </div>
+            <div class="icon-container">
+                <div class="icon size-256">XC</div>
+                <span>256x256</span>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <p>Ou baixe ícones prontos:</p>
+            <a href="https://www.flaticon.com/free-icons/calendar" target="_blank" class="download-btn">Baixar Ícones Prontos</a>
+        </div>
+    </div>
+</body>
+</html>
