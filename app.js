@@ -94,6 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
             year: 'numeric'
         }).replace(/^\w/, c => c.toUpperCase());
 
+        // Atualizar título da seção de anotações
+        updateNotesHeader();
+
         // Limpar dias do calendário
         calendarDays.innerHTML = '';
 
@@ -108,7 +111,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Dias do mês anterior
         for (let i = firstDayIndex; i > 0; i--) {
-            const dayElement = createDayElement(lastDayOfLastMonth - i + 1, true);
+            const day = lastDayOfLastMonth - i + 1;
+            const dayElement = createDayElement(day, true);
+            
+            // Verificar se há anotações neste dia
+            const tempDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, day);
+            if (hasNotesForDate(tempDate)) {
+                dayElement.classList.add('has-notes');
+            }
+            
             calendarDays.appendChild(dayElement);
         }
 
@@ -118,17 +129,35 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Marcar dia atual
             const today = new Date();
-            if (i === today.getDate() && 
-                currentDate.getMonth() === today.getMonth() && 
-                currentDate.getFullYear() === today.getFullYear()) {
+            const isToday = i === today.getDate() && 
+                          currentDate.getMonth() === today.getMonth() && 
+                          currentDate.getFullYear() === today.getFullYear();
+            
+            if (isToday) {
                 dayElement.classList.add('today');
             }
             
+            // Verificar se há anotações neste dia
+            const tempDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+            if (hasNotesForDate(tempDate)) {
+                dayElement.classList.add('has-notes');
+            }
+            
             // Marcar dia selecionado
-            if (i === selectedDate.getDate() && 
-                currentDate.getMonth() === selectedDate.getMonth() && 
-                currentDate.getFullYear() === selectedDate.getFullYear()) {
+            const isSelected = i === selectedDate.getDate() && 
+                             currentDate.getMonth() === selectedDate.getMonth() && 
+                             currentDate.getFullYear() === selectedDate.getFullYear();
+            
+            if (isSelected) {
                 dayElement.classList.add('selected');
+                
+                // Se for o dia atual, rolar para o topo
+                if (isToday) {
+                    setTimeout(() => {
+                        const notesContainer = document.querySelector('.notes-container');
+                        notesContainer.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                }
             }
             
             calendarDays.appendChild(dayElement);
@@ -138,6 +167,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const daysToAdd = 42 - (firstDayIndex + lastDay.getDate()); // 6 linhas de 7 dias
         for (let i = 1; i <= daysToAdd; i++) {
             const dayElement = createDayElement(i, true);
+            
+            // Verificar se há anotações neste dia
+            const tempDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, i);
+            if (hasNotesForDate(tempDate)) {
+                dayElement.classList.add('has-notes');
+            }
+            
             calendarDays.appendChild(dayElement);
         }
     }
@@ -157,9 +193,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Selecionar dia
-    function selectDay(day) {
+    function selectDay(day, isOtherMonth = false) {
         // Salvar nota atual antes de mudar de dia
         saveNote();
+        
+        // Se for um dia de outro mês, ajustar o mês/ano
+        if (isOtherMonth) {
+            // Verificar se o dia é do mês anterior ou próximo
+            if (day > 15) {
+                // É um dia do mês anterior
+                currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+            } else {
+                // É um dia do próximo mês
+                currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+            }
+            
+            // Atualizar o calendário com o novo mês
+            renderCalendar();
+        }
         
         // Atualizar data selecionada
         selectedDate = new Date(
@@ -406,7 +457,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função auxiliar para formatar chave de data
     function formatDateKey(date) {
-        return date.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`; // Formato YYYY-MM-DD
+    }
+    
+    // Verificar se existem anotações para uma data específica
+    function hasNotesForDate(date) {
+        const dateKey = formatDateKey(date);
+        return notes[dateKey] && Object.values(notes[dateKey]).some(categoryNotes => 
+            Array.isArray(categoryNotes) && categoryNotes.length > 0
+        );
+    }
+    
+    // Atualizar o cabeçalho da seção de anotações com a data selecionada
+    function updateNotesHeader() {
+        const notesHeader = document.querySelector('.notes-container h3');
+        if (!notesHeader) return;
+        
+        const today = new Date();
+        const isToday = selectedDate.toDateString() === today.toDateString();
+        const isPast = selectedDate < today && !isToday;
+        
+        let dateString = selectedDate.toLocaleDateString('pt-BR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        // Capitalizar o primeiro caractere
+        dateString = dateString.charAt(0).toUpperCase() + dateString.slice(1);
+        
+        // Adicionar indicador de hoje ou passado
+        if (isToday) {
+            dateString += ' (Hoje)';
+        } else if (isPast) {
+            dateString += ' (Passado)';
+        } else if (selectedDate > today) {
+            dateString += ' (Futuro)';
+        }
+        
+        notesHeader.textContent = `Anotações - ${dateString}`;
     }
 
     // Inicializar a aplicação
